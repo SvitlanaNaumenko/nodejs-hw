@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import pino from 'pino-http';
+import pino from 'pino';
 import 'dotenv/config';
 
 const app = express();
@@ -16,10 +16,10 @@ app.use(
       target: 'pino-pretty',
       options: {
         colorize: true,
-        translateTime: 'HH:MM:ss',
+        translateTime: 'SYS:HH:MM:SS',
         ignore: 'pid,hostname',
         messageFormat:
-          '{req.method} {req.url} {res.statusCode} - {responseTime}ms',
+          '({req.method}) ({req.url}) ({res.statusCode}) - ({responseTime}ms)',
         hideObject: true,
       },
     },
