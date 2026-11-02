@@ -1,17 +1,16 @@
 import express from 'express';
 import cors from 'cors';
-import pino from 'pino';
+import pinoHttp from 'pino-http';
 import 'dotenv/config';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
-// Middleware для парсингу JSON, CORS та логування Pino
+// Middleware для парсингу JSON, CORS та логування HTTP-запитів через pino-http
 app.use(express.json());
 app.use(cors());
 app.use(
-  pino({
-    level: 'info',
+  pinoHttp({
     transport: {
       target: 'pino-pretty',
       options: {
@@ -31,7 +30,7 @@ app.get('/notes', (req, res) => {
   res.status(200).json({ message: 'Retrieved all notes' });
 });
 
-// Маршрут для отримання однієї нотатки за ID
+// Маршрут для отримання однієї нотатки за ID (чистий JSON-об'єкт)
 app.get('/notes/:noteId', (req, res) => {
   const { noteId } = req.params;
   res.status(200).json(`{ message: Retrieved note with ID: ${noteId} }`);
