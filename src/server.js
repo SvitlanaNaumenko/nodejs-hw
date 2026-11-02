@@ -33,7 +33,7 @@ app.get('/notes', (req, res) => {
 // Маршрут для отримання однієї нотатки за ID (виправлено на справжній об'єкт без бектіків)
 app.get('/notes/:noteId', (req, res) => {
   const { noteId } = req.params;
-  res.status(200).json(`{ message: Retrieved note with ID: ${noteId} }`);
+  res.status(200).json({ message: `Retrieved note with ID: ${noteId}` });
 });
 
 // Спеціальний маршрут для тестування middleware помилки
