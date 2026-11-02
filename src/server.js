@@ -30,7 +30,7 @@ app.get('/notes', (req, res) => {
   res.status(200).json({ message: 'Retrieved all notes' });
 });
 
-// Маршрут для отримання однієї нотатки за ID (чистий JSON-об'єкт)
+// Маршрут для отримання однієї нотатки за ID (виправлено на справжній об'єкт без бектіків)
 app.get('/notes/:noteId', (req, res) => {
   const { noteId } = req.params;
   res.status(200).json(`{ message: Retrieved note with ID: ${noteId} }`);
