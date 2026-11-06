@@ -1,17 +1,17 @@
-import express from "express";
-import "dotenv/config";
-import cors from "cors";
+import express from 'express';
+import 'dotenv/config';
+import cors from 'cors';
 
-import { connectMongoDB } from "./db/connectMongoDB.js";
-import { logger } from "./middleware/logger.js";
-import { notFoundHandler } from "./middleware/notFoundHandler.js";
-import { errorHandler } from "./middleware/errorHandler.js";
+import { connectMongoDB } from './db/connectMongoDB.js';
+import { logger } from './middleware/logger.js';
+import { notFoundHandler } from './middleware/notFoundHandler.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 // Імпорт групи маршрутів для нотаток
-import notesRoutes from "./routes/notesRoutes.js";
+import notesRoutes from './routes/notesRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT ?? 3030;
+const PORT = process.env.PORT ?? 3000;
 
 // Глобальні middleware
 app.use(logger);
@@ -33,7 +33,7 @@ const startServer = async () => {
       console.log(`Server is running on port ${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error('Failed to start server:', error);
   }
 };
 
