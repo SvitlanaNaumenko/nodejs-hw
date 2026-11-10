@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use(cors());
 
 // Підключаємо групи маршрутів
-app.use('/auth', authRoutes);
+app.use(authRoutes);
 app.use(notesRoutes);
 
 // Додаємо обробник помилок celebrate
@@ -38,7 +38,7 @@ const startServer = async () => {
   try {
     await connectMongoDB();
     app.listen(PORT, () => {
-      console.log('Server is running on port ${PORT}');
+      console.log(`Server is running on port ${PORT}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

@@ -5,6 +5,10 @@ import { User } from '../models/user.js';
 export const authenticate = async (req, res, next) => {
   const { accessToken, sessionId } = req.cookies;
 
+  if (!sessionId) {
+    return next(createHttpError(401, 'Session id is missing'));
+  }
+
   if (!accessToken) {
     return next(createHttpError(401, 'Missing access token'));
   }

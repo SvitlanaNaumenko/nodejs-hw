@@ -10,7 +10,7 @@ export const registerUser = async (req, res) => {
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw createHttpError(400, 'Email in use');
+    throw createHttpError(409, 'Email in use');
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -44,6 +44,9 @@ export const loginUser = async (req, res) => {
     throw createHttpError(401, 'Invalid credentials');
   }
 
+  // Видаляємо попередні сесії користувача перед створенням нової
+  await Session.deleteMany({ userId: user._id });
+
   const session = await createSession(user._id);
   setSessionCookies(res, session);
 
@@ -66,6 +69,10 @@ export const refreshUserSession = async (req, res) => {
   const isSessionExpired =
     new Date() > new Date(session.refreshTokenValidUntil);
   if (isSessionExpired) {
+    await Session.deleteOne({ _id: sessionId });
+    res.clearCookie('sessionId');
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
     throw createHttpError(401, 'Session token expired');
   }
 
@@ -77,6 +84,9 @@ export const refreshUserSession = async (req, res) => {
   res.status(200).json({
     status: 200,
     message: 'Session refreshed',
+    data: {
+      accessToken: newSession.accessToken,
+    },
   });
 };
 
