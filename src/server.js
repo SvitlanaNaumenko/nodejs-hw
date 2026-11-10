@@ -18,6 +18,7 @@ const PORT = process.env.PORT ?? 3000;
 // Глобальні middleware
 app.use(logger);
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors());
 
 // Підключаємо групи маршрутів
