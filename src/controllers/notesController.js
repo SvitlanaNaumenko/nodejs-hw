@@ -1,15 +1,16 @@
 import createHttpError from 'http-errors';
 import { Note } from '../models/note.js';
 
-// Отримати список усіх нотаток (з паралельним виконанням запитів через Promise.all)
+// Отримати список усіх нотаток поточного користувача
 export const getAllNotes = async (req, res) => {
   const { page = 1, perPage = 10, tag, search } = req.query;
+  const userId = req.user._id;
 
   const parsedPage = parseInt(page, 10);
   const parsedPerPage = parseInt(perPage, 10);
   const skip = (parsedPage - 1) * parsedPerPage;
 
-  const notesQuery = Note.find();
+  const notesQuery = Note.find({ userId });
 
   if (tag) {
     notesQuery.where('tag').equals(tag);
@@ -41,10 +42,12 @@ export const getAllNotes = async (req, res) => {
   });
 };
 
-// Отримати одну нотатку за id
+// Отримати одну нотатку за id (що належить поточному користувачу)
 export const getNoteById = async (req, res) => {
   const { noteId } = req.params;
-  const note = await Note.findById(noteId);
+  const userId = req.user._id;
+
+  const note = await Note.findOne({ _id: noteId, userId });
 
   if (!note) {
     throw createHttpError(404, 'Note not found');
@@ -53,17 +56,22 @@ export const getNoteById = async (req, res) => {
   res.status(200).json(note);
 };
 
-// Створити нову нотатку
+// Створити нову нотатку з прив'язкою до userId
 export const createNote = async (req, res) => {
-  const note = await Note.create(req.body);
+  const userId = req.user._id;
+  const note = await Note.create({ ...req.body, userId });
+
   res.status(201).json(note);
 };
 
-// Видалити нотатку за id
+// Видалити нотатку за id (тільки свою)
 export const deleteNote = async (req, res) => {
   const { noteId } = req.params;
+  const userId = req.user._id;
+
   const note = await Note.findOneAndDelete({
     _id: noteId,
+    userId,
   });
 
   if (!note) {
@@ -73,11 +81,12 @@ export const deleteNote = async (req, res) => {
   res.status(200).json(note);
 };
 
-// Оновити нотатку за id (часткове оновлення)
+// Оновити нотатку за id (тільки свою)
 export const updateNote = async (req, res) => {
   const { noteId } = req.params;
+  const userId = req.user._id;
 
-  const note = await Note.findOneAndUpdate({ _id: noteId }, req.body, {
+  const note = await Note.findOneAndUpdate({ _id: noteId, userId }, req.body, {
     returnDocument: 'after',
   });
 

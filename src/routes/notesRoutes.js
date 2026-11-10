@@ -13,8 +13,12 @@ import {
   createNoteSchema,
   updateNoteSchema,
 } from '../validations/notesValidation.js';
+import { authenticate } from '../middleware/authenticate.js';
 
 const router = Router();
+
+// Застосовуємо middleware автентифікації до всіх роутів нотаток
+router.use(authenticate);
 
 // Маршрут для отримання всіх нотаток (з валідацією query-параметрів)
 router.get('/notes', celebrate(getAllNotesSchema), getAllNotes);
