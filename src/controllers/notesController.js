@@ -1,7 +1,7 @@
 import createHttpError from 'http-errors';
 import { Note } from '../models/note.js';
 
-// Отримати список усіх нотаток (з підтримкою фільтрації, пошуку та пагінації)
+// Отримати список усіх нотаток (з використанням ланцюжка методів .find().where())
 export const getAllNotes = async (req, res) => {
   const { page = 1, perPage = 10, tag, search } = req.query;
 
@@ -9,26 +9,28 @@ export const getAllNotes = async (req, res) => {
   const parsedPerPage = parseInt(perPage, 10);
   const skip = (parsedPage - 1) * parsedPerPage;
 
-  // Формуємо об'єкт фільтрації
-  const filter = {};
+  // Використовуємо ланцюжок методів запиту
+  const notesQuery = Note.find();
 
   if (tag) {
-    filter.tag = tag;
+    notesQuery.where('tag').equals(tag);
   }
 
   if (search) {
-    filter.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { content: { $regex: search, $options: 'i' } },
-    ];
+    notesQuery.where({
+      $or: [
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+      ],
+    });
   }
 
-  // Рахуємо загальну кількість нотаток з урахуванням фільтрів
-  const totalNotes = await Note.countDocuments(filter);
+  // Отримуємо загальну кількість нотаток з урахуванням умов запиту
+  const totalNotes = await Note.countDocuments(notesQuery.getFilter());
   const totalPages = Math.ceil(totalNotes / parsedPerPage);
 
-  // Отримуємо нотатки для поточної сторінки
-  const notes = await Note.find(filter).skip(skip).limit(parsedPerPage);
+  // Отримуємо самі нотатки з пагінацією через ланцюжок
+  const notes = await notesQuery.skip(skip).limit(parsedPerPage);
 
   res.status(200).json({
     page: parsedPage,
