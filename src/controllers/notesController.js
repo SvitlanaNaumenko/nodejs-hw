@@ -1,7 +1,7 @@
 import createHttpError from 'http-errors';
 import { Note } from '../models/note.js';
 
-// Отримати список усіх нотаток (з використанням ланцюжка методів .find().where())
+// Отримати список усіх нотаток (з паралельним виконанням запитів через Promise.all)
 export const getAllNotes = async (req, res) => {
   const { page = 1, perPage = 10, tag, search } = req.query;
 
@@ -9,7 +9,6 @@ export const getAllNotes = async (req, res) => {
   const parsedPerPage = parseInt(perPage, 10);
   const skip = (parsedPage - 1) * parsedPerPage;
 
-  // Використовуємо ланцюжок методів запиту
   const notesQuery = Note.find();
 
   if (tag) {
@@ -25,12 +24,13 @@ export const getAllNotes = async (req, res) => {
     });
   }
 
-  // Отримуємо загальну кількість нотаток з урахуванням умов запиту
-  const totalNotes = await Note.countDocuments(notesQuery.getFilter());
-  const totalPages = Math.ceil(totalNotes / parsedPerPage);
+  // Виконуємо підрахунок та отримання нотаток паралельно через Promise.all
+  const [totalNotes, notes] = await Promise.all([
+    Note.countDocuments(notesQuery.getFilter()),
+    notesQuery.skip(skip).limit(parsedPerPage),
+  ]);
 
-  // Отримуємо самі нотатки з пагінацією через ланцюжок
-  const notes = await notesQuery.skip(skip).limit(parsedPerPage);
+  const totalPages = Math.ceil(totalNotes / parsedPerPage);
 
   res.status(200).json({
     page: parsedPage,
